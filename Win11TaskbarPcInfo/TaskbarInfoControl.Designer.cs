@@ -41,8 +41,8 @@
             this.label1.Location = new System.Drawing.Point(0, 3);
             this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-            this.label1.Size = new System.Drawing.Size(61, 20);
+            this.label1.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
+            this.label1.Size = new System.Drawing.Size(61, 19);
             this.label1.TabIndex = 2;
             this.label1.Text = "label1";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -54,6 +54,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.label1);
+            this.Location = new System.Drawing.Point(0, 3);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "TaskbarInfoControl";
             this.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);

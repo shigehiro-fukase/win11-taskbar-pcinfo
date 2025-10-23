@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Windows.Forms;
+using System.Security.Policy;
 
 namespace Win11TaskbarPcInfo
 {
@@ -38,6 +39,28 @@ namespace Win11TaskbarPcInfo
         private void OnDispose(object sender, EventArgs e)
         {
         }
+        private void ApplyTheme()
+        {
+#if false // Not worked
+            Win32.EnableDarkMode(this.Handle);
+            foreach (Control ctrl in this.Controls)
+            {
+                Win32.EnableDarkMode(ctrl.Handle);
+            }
+#else
+            bool dark = Win32.IsDarkMode();
+            //this.BackColor = dark ? Color.FromArgb(32, 32, 32) : Color.Transparent /*  SystemColors.Control */;
+            //this.ForeColor = dark ? Color.White : Color.Black;
+            if (dark)
+            {
+                foreach (Control ctrl in this.Controls)
+                {
+                    ctrl.BackColor = Color.FromArgb(32, 32, 32);
+                    ctrl.ForeColor = Color.White;
+                }
+            }
+#endif
+        }
 
         private void Initialize()
         {
@@ -52,6 +75,7 @@ namespace Win11TaskbarPcInfo
 
             InitializeComponent();
             AdjustControlSize();
+            ApplyTheme();
         }
 
         private void updateLabel()
@@ -104,6 +128,7 @@ namespace Win11TaskbarPcInfo
         private void TaskbarInfoControl_VisibleChanged(object sender, EventArgs e)
         {
             updateLabel();
+            ApplyTheme();
         }
     }
 }

@@ -51,6 +51,29 @@ namespace Win11TaskbarPcInfo
             var version = OSVersion();
             return version.Major >= 10 && version.Build >= 22621;
         }
+        public static bool IsDarkMode()
+        {
+            try
+            {
+                const string keyPath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+                var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyPath);
+                if (key != null)
+                {
+                    object value = key.GetValue("AppsUseLightTheme");
+                    if (value is int intValue)
+                        return intValue == 0; // 0 = Dark Mode
+                }
+            }
+            catch { }
+            return false; // Light Mode
+        }
+        [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20; // Windows 10 1809 or later
+        public static void EnableDarkMode(IntPtr handle)
+        {
+            int useDark = IsDarkMode() ? 1 : 0;
+            DwmSetWindowAttribute(handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDark, sizeof(int));
+        }
 
         [DllImport("user32.dll", EntryPoint = "FindWindowEx", CharSet = CharSet.Auto)] private static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)] private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
