@@ -413,6 +413,7 @@ namespace Win11TaskbarPcInfo
                     Icon = (System.Drawing.Icon)Properties.Resources.icon,
                     ContextMenu = new ContextMenu(new MenuItem[] {
                         new MenuItem("Exit", Exit),
+                        new MenuItem("Restart", Restart),
                     }),
                     Visible = true
                 };              
@@ -421,6 +422,43 @@ namespace Win11TaskbarPcInfo
             void Exit(object sender, EventArgs e)
             {               
                 Application.Exit();
+            }
+
+            void Restart(object sender, EventArgs e)
+            {
+                // 1. Get gurrent application's .exe path
+                string currentExecutablePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+                if (string.IsNullOrEmpty(currentExecutablePath))
+                {
+                    MessageBox.Show("Could not determine the path to the executable file. Restart failed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                try
+                {
+                    // 2. Execute new application process
+                    string arguments = "";
+                    ProcessStartInfo startInfo = new ProcessStartInfo(currentExecutablePath)
+                    {
+                        UseShellExecute = true,
+                        Arguments = arguments
+                    };
+
+                    using (Process process = Process.Start(startInfo))
+                    {
+                        if (process != null && !process.HasExited)
+                        {
+                            // 3. Quit current process (after new instance invoked)
+                            Application.Exit(); // or Environment.Exit(0);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred during the restart: {ex.Message}\nPlease close the program manually.", "Restart Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Application.Exit();
+                }
             }
 
             protected override void Dispose(bool disposing)
