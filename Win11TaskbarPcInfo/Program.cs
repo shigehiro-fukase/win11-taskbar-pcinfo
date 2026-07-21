@@ -413,6 +413,7 @@ namespace Win11TaskbarPcInfo
                     Icon = (System.Drawing.Icon)Properties.Resources.icon,
                     ContextMenu = new ContextMenu(new MenuItem[] {
                         new MenuItem("Exit", Exit),
+                        new MenuItem("Restart", Restart),
                     }),
                     Visible = true
                 };              
@@ -421,6 +422,45 @@ namespace Win11TaskbarPcInfo
             void Exit(object sender, EventArgs e)
             {               
                 Application.Exit();
+            }
+
+            void Restart(object sender, EventArgs e)
+            {
+                // 1. 現在のアプリケーションのパスを取得する
+                string currentExecutablePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+                if (string.IsNullOrEmpty(currentExecutablePath))
+                {
+                    MessageBox.Show("実行ファイルのパスを特定できませんでした。再起動に失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                try
+                {
+                    // 2. 新しいプロセスとして自分自身を呼び出す（引数を渡さず、単体で実行）
+                    string arguments = ""; // 再起動時に特別な引数が必要なければ空文字列
+                    ProcessStartInfo startInfo = new ProcessStartInfo(currentExecutablePath)
+                    {
+                        UseShellExecute = true,
+                        Arguments = arguments
+                    };
+
+                    // 3. 新しいプロセスを起動する
+                    using (Process process = Process.Start(startInfo))
+                    {
+                        if (process != null && !process.HasExited)
+                        {
+                            // 4. 現在のプロセスを終了させる（新しいインスタンスが立ち上がったことを確認してから）
+                            Application.Exit(); // または Environment.Exit(0); を使用しても良いですが、Application.Exit()の方がWinFormsライブラリとの兼ね合いで安全な場合があります。
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"再起動中にエラーが発生しました: {ex.Message}\nプログラムを手動で終了してください。", "再起動失敗", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    // エラー時も必ずアプリケーションを終了させる念のための処理（無限ループ防止）
+                    Application.Exit();
+                }
             }
 
             protected override void Dispose(bool disposing)
